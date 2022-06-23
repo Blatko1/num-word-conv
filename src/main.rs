@@ -1,5 +1,3 @@
-const PRIMARY_UNITS_COUNT: usize = 9;
-
 const PRIMARIES: &[&[&str]] = &[NAEST, UNITS, TENS, HUNDREDS];
 
 const UNITS: &[&str] = &[
@@ -81,17 +79,15 @@ enum PluralType {
 }
 
 fn main() {
-    println!("Upisi broj!");
+    println!("Upisi broj: ");
     let nums = match get_input() {
         Ok(n) => n,
         Err(_) => return,
     };
 
     let length = nums.len();
-    let mut num_iter = nums.iter().peekable();
-    let groups = (length as f32 / 3.0).ceil() as usize;
-    let mut group = groups;
-    let mut weight = if length % 3 == 0 { 3 } else { length % 3 };
+    let group_count = (length as f32 / 3.0).ceil() as usize;
+    println!("nums: {:?}", nums);
 
     // The provided number is split into groups with 3 members starting
     // from the smallest number weight. Last group, which has the highest
@@ -99,67 +95,150 @@ fn main() {
     // Loop starts from the group with the highest the group with the
     // lowest weight. Every time a group is finished
 
-    while let Some(&num) = num_iter.next() {
-        let mut number = num as usize;
-        let plural_type;
+    for g in 0..group_count {
+        // Group with 3 elements
+        let offset = 3 * g;
+        let hundreds = nums[offset];
+        let tens = nums[1 + offset];
+        let units = nums[2 + offset];
 
-        match num {
-            Number::Zero => continue,
-            Number::One => {
-                plural_type = PluralType::One;
-                // Check if the number ends with -naest (jedanaest, dvanaest, ...)
-                if weight != 1 && (weight + 1) % 3 == 0 {
-                    if let Some(&&peek_num) = num_iter.peek() {
-                        if peek_num != Number::Zero {
-                            weight = 0;
-                            number = peek_num as usize;
-                            // Skip the next number
-                            num_iter.next().unwrap();
-                        }
+        // Check if groups name will be thousands.
+        // Used for checking special cases
+        let is_special_unit_name = g % 2 == 0;
+
+        let group = Group {
+            hundreds,
+            tens,
+            units,
+        };
+        let info = group.to_str(is_special_unit_name);
+        let str = info.converted;
+        print!("{}", str);
+
+        // Check if group name should be printed.
+        if g != group_count - 1 {
+            let group_name = match GROUP_NAMES.get(group_count - g - 2) {
+                Some(name) => name,
+                None => {
+                    println!(
+                        "Veličina broja od {} znamenki još nije uprogramirana!",
+                        length
+                    );
+                    return;
+                }
+            };
+            let index = match info.plural_type {
+                PluralType::One => 0,
+                PluralType::TwoFour => 1,
+                PluralType::FiveNine => {
+                    if g + 2 == group_count {
+                        0
+                    } else {
+                        group_name.len() - 1
                     }
                 }
-            }
-            Number::Two => {
-                plural_type = PluralType::TwoFour;
-            }
-            Number::Three => {
-                plural_type = PluralType::TwoFour;
-            }
-            Number::Four => {
-                plural_type = PluralType::TwoFour;
-            }
-            _ => {
-                plural_type = PluralType::FiveNine;
-            }
-        }
-        // Print primary digits (units, tens, thousands)
-        let primary_group = PRIMARIES[weight];
-        let digit = primary_group[number - 1];
-        print!("{} ", digit);
-
-        weight -= 1;
-
-        if weight == 0 {
-            // If it's not the last group, print the group name
-            // (thousands, millions, ...)
-            if group > 1 {
-                let g = GROUP_NAMES[group - 2];
-                let group_name = match plural_type {
-                    PluralType::One => g.first().unwrap(),
-                    PluralType::TwoFour => g.last().unwrap(),
-                    PluralType::FiveNine => g.last().unwrap(),
-                };
-                print!("{} ", group_name);
-                group -= 1;
-            }
-
-            weight = 3;
+            };
+            print!("{} ", group_name[index]);
         }
     }
 }
 
+struct Group {
+    hundreds: Number,
+    tens: Number,
+    units: Number,
+}
+
+impl Group {
+    fn to_str(&self, is_special_unit_name: bool) -> GroupInfo {
+        let mut converted = String::new();
+        let mut plural_type = PluralType::FiveNine;
+        let group = vec![self.hundreds, self.tens, self.units];
+
+        let last_digit = self.units;
+        let mut digit_position = 3;
+
+        for digit in group {
+            let mut digit_value = digit as usize;
+
+            match digit {
+                Number::Zero => {
+                    plural_type = PluralType::FiveNine;
+                    digit_position -= 1;
+                    continue;
+                }
+                Number::One => {
+                    plural_type = PluralType::One;
+
+                    // Check if the number ends with -naest (jedanaest, dvanaest, ...)
+                    // Check if current digit is at 2nd position (3, *1*, 4).
+                    if digit_position == 2 && last_digit != Number::Zero {
+                        digit_value = last_digit as usize;
+
+                        // special naest group
+                        let primary_digits = PRIMARIES[0];
+                        let digit = primary_digits[digit_value - 1];
+                        converted.push_str(digit);
+                        converted.push(' ');
+
+                        // Skip the next number
+                        break;
+                    }
+
+                    // In Croatian language, there are also used special
+                    // word numbers in rare cases before thousand name.
+                    if is_special_unit_name && digit_position == 1 {
+                        let primary_digits = PRIMARIES[1]; // units
+                        let digit = primary_digits[9]; // special word type
+                        converted.push_str(digit);
+                        converted.push(' ');
+
+                        break;
+                    }
+                }
+                Number::Two => {
+                    plural_type = PluralType::TwoFour;
+
+                    // In Croatian language, there are also used special
+                    // word numbers in rare cases before thousand name.
+                    if is_special_unit_name && digit_position == 1 {
+                        let primary_digits = PRIMARIES[1]; // units
+                        let digit = primary_digits[10]; // special word type
+                        converted.push_str(digit);
+                        converted.push(' ');
+
+                        break;
+                    }
+                }
+                Number::Three => plural_type = PluralType::TwoFour,
+                Number::Four => plural_type = PluralType::TwoFour,
+                _ => plural_type = PluralType::FiveNine,
+            }
+            // Print primary digits (units, tens, hundreds)
+            let primary_digits = PRIMARIES[digit_position];
+            let digit = primary_digits[digit_value - 1];
+            converted.push_str(digit);
+            converted.push(' ');
+
+            digit_position -= 1;
+        }
+
+        GroupInfo {
+            converted,
+            plural_type,
+        }
+    }
+}
+
+struct GroupInfo {
+    converted: String,
+    plural_type: PluralType,
+}
+
 fn get_input() -> Result<Vec<Number>, ()> {
+    let mut result = Vec::new();
     let mut input = String::new();
+
     match std::io::stdin().read_line(&mut input) {
         Ok(_) => (),
         Err(_) => {
@@ -168,12 +247,21 @@ fn get_input() -> Result<Vec<Number>, ()> {
         }
     }
 
-    let mut result = Vec::new();
     let mut chars = input.trim().chars();
+
     // Check if all chars are digits
     if !chars.all(|x| x.is_ascii_digit()) {
         println!("Upisan je znak koji nije znamenka!");
         return Err(());
+    }
+
+    // Padding
+    let number_len = input.trim().len();
+    let padding_count = 3 - (number_len % 3);
+    if padding_count != 3 {
+        for _ in 0..padding_count {
+            result.push(Number::Zero);
+        }
     }
 
     for c in input.trim().chars() {
@@ -199,4 +287,69 @@ impl From<char> for Number {
             _ => panic!("Not a number!"),
         }
     }
+}
+
+#[test]
+fn test1() {
+    let hundreds = Number::Four;
+    let tens = Number::One;
+    let units = Number::Three;
+    let thousands = false;
+
+    let g = Group {
+        hundreds,
+        tens,
+        units,
+    };
+    assert_eq!(g.to_str(thousands).converted, "četiristo trinaest ");
+}
+
+#[test]
+fn test2() {
+    let hundreds = Number::Zero;
+    let tens = Number::Zero;
+    let units = Number::Three;
+    let thousands = false;
+
+    let g = Group {
+        hundreds,
+        tens,
+        units,
+    };
+    assert_eq!(g.to_str(thousands).converted, "tri ");
+}
+
+#[test]
+fn test3() {
+    let hundreds = Number::Zero;
+    let tens = Number::Three;
+    let units = Number::Three;
+    let thousands = false;
+
+    let g = Group {
+        hundreds,
+        tens,
+        units,
+    };
+    assert_eq!(g.to_str(thousands).converted, "trideset tri ");
+}
+
+#[test]
+fn test4() {
+    let hundreds = Number::Zero;
+    let tens = Number::One;
+    let units = Number::Six;
+    let thousands = false;
+
+    let g = Group {
+        hundreds,
+        tens,
+        units,
+    };
+    assert_eq!(g.to_str(thousands).converted, "šesnaest ");
+}
+
+#[test]
+fn test_all() {
+    
 }
