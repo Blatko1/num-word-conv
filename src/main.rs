@@ -1,7 +1,8 @@
 const PRIMARIES: &[&[&str]] = &[NAEST, UNITS, TENS, HUNDREDS];
 
 const UNITS: &[&str] = &[
-    "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet", "jedna", "dvije",
+    "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet",
+    "jedna", "dvije",
 ];
 
 const NAEST: &[&str] = &[
@@ -90,33 +91,37 @@ fn main() {
     println!("nums: {:?}", nums);
 
     // The provided number is split into groups with 3 members starting
-    // from the smallest number weight. Last group, which has the highest
-    // weight can have less than 3 members.
-    // Loop starts from the group with the highest the group with the
-    // lowest weight. Every time a group is finished
+    // from the highest number weight. Every time a group is finished the
+    // check if the group name should be printed commences.
 
     for g in 0..group_count {
-        // Group with 3 elements
         let offset = 3 * g;
+
+        // Group with 3 elements
         let hundreds = nums[offset];
         let tens = nums[1 + offset];
         let units = nums[2 + offset];
 
-        // Check if groups name will be thousands.
-        // Used for checking special cases
-        let is_special_unit_name = g % 2 == 0;
+        // Check if groups name will be thousands, milijarda, bilijarda, trilijarda, ...
+        // Used for checking special word cases
+        // Second part of the check filters out the last group.
+        let is_last_group = g == group_count - 1;
+        let is_special_unit_name = (g % 2 != 0) && !is_last_group;
 
+        // Create and convert a group.
         let group = Group {
             hundreds,
             tens,
             units,
         };
-        let info = group.to_str(is_special_unit_name);
-        let str = info.converted;
+        let group_info = group.to_str(is_special_unit_name);
+        let str = group_info.converted;
         print!("{}", str);
 
-        // Check if group name should be printed.
-        if g != group_count - 1 {
+        // Check if group name should be printed. Checks if a group has any numbers other
+        // than zero and if it is not the last group.
+        if !group.is_blank() && !is_last_group {
+            // Get the belonging group. Exits the program if the number is too high.
             let group_name = match GROUP_NAMES.get(group_count - g - 2) {
                 Some(name) => name,
                 None => {
@@ -127,7 +132,8 @@ fn main() {
                     return;
                 }
             };
-            let index = match info.plural_type {
+            // Indexing the right wording for the group that depends on the unit of a group.
+            let index = match group_info.plural_type {
                 PluralType::One => 0,
                 PluralType::TwoFour => 1,
                 PluralType::FiveNine => {
@@ -171,8 +177,9 @@ impl Group {
                     plural_type = PluralType::One;
 
                     // Check if the number ends with -naest (jedanaest, dvanaest, ...)
-                    // Check if current digit is at 2nd position (3, *1*, 4).
+                    // Also check if current digit is at 2nd position (3, *1*, 4).
                     if digit_position == 2 && last_digit != Number::Zero {
+                        plural_type = PluralType::FiveNine;
                         digit_value = last_digit as usize;
 
                         // special naest group
@@ -181,7 +188,7 @@ impl Group {
                         converted.push_str(digit);
                         converted.push(' ');
 
-                        // Skip the next number
+                        // Skip to the end
                         break;
                     }
 
@@ -193,12 +200,12 @@ impl Group {
                         converted.push_str(digit);
                         converted.push(' ');
 
+                        // Skip to the end
                         break;
                     }
                 }
                 Number::Two => {
                     plural_type = PluralType::TwoFour;
-
                     // In Croatian language, there are also used special
                     // word numbers in rare cases before thousand name.
                     if is_special_unit_name && digit_position == 1 {
@@ -207,6 +214,7 @@ impl Group {
                         converted.push_str(digit);
                         converted.push(' ');
 
+                        // Skip to the end
                         break;
                     }
                 }
@@ -227,6 +235,12 @@ impl Group {
             converted,
             plural_type,
         }
+    }
+
+    fn is_blank(&self) -> bool {
+        self.units == Number::Zero
+            && self.tens == Number::Zero
+            && self.hundreds == Number::Zero
     }
 }
 
@@ -255,7 +269,7 @@ fn get_input() -> Result<Vec<Number>, ()> {
         return Err(());
     }
 
-    // Padding
+    // Fill padding. Turns 1,479 -> 001,479
     let number_len = input.trim().len();
     let padding_count = 3 - (number_len % 3);
     if padding_count != 3 {
@@ -347,9 +361,4 @@ fn test4() {
         units,
     };
     assert_eq!(g.to_str(thousands).converted, "šesnaest ");
-}
-
-#[test]
-fn test_all() {
-    
 }
