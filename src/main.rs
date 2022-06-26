@@ -81,7 +81,7 @@ enum PluralType {
 
 fn main() {
     println!("Upisi broj: ");
-    let nums = match get_input() {
+    let (nums, in_currency) = match get_input() {
         Ok(n) => n,
         Err(_) => return,
     };
@@ -105,9 +105,11 @@ fn main() {
         // Check if groups name will be thousands, milijarda, bilijarda, trilijarda, ...
         // Used for checking special word cases
         // Second part of the check filters out the last group.
+        let g_inv = group_count - g - 1;
         let is_last_group = g == group_count - 1;
-        let is_special_unit_name = (g % 2 != 0) && !is_last_group;
-
+        let is_special_unit_name = ((g_inv % 2 != 0) && !is_last_group)
+            || (in_currency && is_last_group);
+        println!("is_special_unit_name: {}", is_special_unit_name);
         // Create and convert a group.
         let group = Group {
             hundreds,
@@ -249,11 +251,12 @@ struct GroupInfo {
     plural_type: PluralType,
 }
 
-fn get_input() -> Result<Vec<Number>, ()> {
+fn get_input() -> Result<(Vec<Number>, bool), ()> {
     let mut result = Vec::new();
-    let mut input = String::new();
+    let mut inpt = String::new();
+    let mut in_currency = false;
 
-    match std::io::stdin().read_line(&mut input) {
+    match std::io::stdin().read_line(&mut inpt) {
         Ok(_) => (),
         Err(_) => {
             println!("Greska pri upisu!");
@@ -261,7 +264,17 @@ fn get_input() -> Result<Vec<Number>, ()> {
         }
     }
 
-    let mut chars = input.trim().chars();
+    let mut input = inpt.trim().to_owned();
+    let length = input.len();
+
+    let last_two = &input[length - 2..length];
+    if last_two.eq("kn") {
+        in_currency = true;
+        input.pop();
+        input.pop();
+    }
+
+    let mut chars = input.chars();
 
     // Check if all chars are digits
     if !chars.all(|x| x.is_ascii_digit()) {
@@ -269,7 +282,7 @@ fn get_input() -> Result<Vec<Number>, ()> {
         return Err(());
     }
 
-    // Fill padding. Turns 1,479 -> 001,479
+    // Fill padding. Turns [1,4,7,9] -> [0,0,1,4,7,9]
     let number_len = input.trim().len();
     let padding_count = 3 - (number_len % 3);
     if padding_count != 3 {
@@ -282,7 +295,7 @@ fn get_input() -> Result<Vec<Number>, ()> {
         result.push(c.into());
     }
 
-    Ok(result)
+    Ok((result, in_currency))
 }
 
 impl From<char> for Number {
