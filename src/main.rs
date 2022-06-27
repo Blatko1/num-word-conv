@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 const PRIMARIES: &[&[&str]] = &[NAEST, UNITS, TENS, HUNDREDS];
 
 const UNITS: &[&str] = &[
@@ -80,19 +82,25 @@ enum PluralType {
 }
 
 fn main() {
-    println!("Upisi broj: ");
-    let (nums, in_currency) = match get_input() {
+    let input = match get_input() {
+        Ok(i) => i,
+        Err(_) => return,
+    };
+
+    let (nums, in_currency) = match load_input(input) {
         Ok(n) => n,
         Err(_) => return,
     };
 
     let length = nums.len();
     let group_count = (length as f32 / 3.0).ceil() as usize;
-    println!("nums: {:?}", nums);
+    // println!("nums: {:?}", nums);
 
     // The provided number is split into groups with 3 members starting
     // from the highest number weight. Every time a group is finished the
     // check if the group name should be printed commences.
+
+    print!("Konvertirano: \n\t\t");
 
     for g in 0..group_count {
         let offset = 3 * g;
@@ -109,7 +117,6 @@ fn main() {
         let is_last_group = g == group_count - 1;
         let is_special_unit_name = ((g_inv % 2 != 0) && !is_last_group)
             || (in_currency && is_last_group);
-        println!("is_special_unit_name: {}", is_special_unit_name);
         // Create and convert a group.
         let group = Group {
             hundreds,
@@ -118,7 +125,7 @@ fn main() {
         };
         let group_info = group.to_str(is_special_unit_name);
         let str = group_info.converted;
-        print!("{}", str);
+        print!("{}", str.yellow());
 
         // Check if group name should be printed. Checks if a group has any numbers other
         // than zero and if it is not the last group.
@@ -146,9 +153,10 @@ fn main() {
                     }
                 }
             };
-            print!("{} ", group_name[index]);
+            print!("{} ", group_name[index].green());
         }
     }
+    println!("\n");
 }
 
 struct Group {
@@ -251,27 +259,20 @@ struct GroupInfo {
     plural_type: PluralType,
 }
 
-fn get_input() -> Result<(Vec<Number>, bool), ()> {
+fn load_input(inpt: String) -> Result<(Vec<Number>, bool), ()> {
     let mut result = Vec::new();
-    let mut inpt = String::new();
     let mut in_currency = false;
-
-    match std::io::stdin().read_line(&mut inpt) {
-        Ok(_) => (),
-        Err(_) => {
-            println!("Greska pri upisu!");
-            return Err(());
-        }
-    }
 
     let mut input = inpt.trim().to_owned();
     let length = input.len();
 
-    let last_two = &input[length - 2..length];
-    if last_two.eq("kn") {
-        in_currency = true;
-        input.pop();
-        input.pop();
+    if length > 2 {
+        let last_two = &input[length - 2..length];
+        if last_two.eq("kn") {
+            in_currency = true;
+            input.pop();
+            input.pop();
+        }
     }
 
     let mut chars = input.chars();
@@ -296,6 +297,23 @@ fn get_input() -> Result<(Vec<Number>, bool), ()> {
     }
 
     Ok((result, in_currency))
+}
+
+fn get_input() -> Result<String, ()> {
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() > 2 {
+        println!("Previše argumenata!");
+        return Err(());
+    }
+
+    match args.get(1) {
+        Some(arg) => Ok(arg.to_owned()),
+        None => {
+            println!("Nije upisan broj kao argument!");
+            Err(())
+        }
+    }
 }
 
 impl From<char> for Number {
