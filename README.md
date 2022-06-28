@@ -10,7 +10,7 @@ It is recommended to run this program in a terminal which supports colors.
 
 First, clone the source code and enter it's directory.
 
-Then build the exe:
+Then build the '*.exe*':
 
 ```console
 > cargo build --release
