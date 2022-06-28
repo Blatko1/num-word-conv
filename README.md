@@ -2,7 +2,7 @@
 
 CLI program that converts numbers to words in Croatian language.
 
-## Before use
+## Note before use
 
 It is recommended to run this program in a terminal which supports colors.
 
