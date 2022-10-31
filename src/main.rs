@@ -87,7 +87,7 @@ fn main() {
         Err(_) => return,
     };
 
-    let (nums, in_currency) = match load_input(input) {
+    let (nums, in_currency) = match parse_input(input) {
         Ok(n) => n,
         Err(_) => return,
     };
@@ -97,8 +97,8 @@ fn main() {
     // println!("nums: {:?}", nums);
 
     // The provided number is split into groups with 3 members starting
-    // from the highest number weight. Every time a group is finished the
-    // check if the group name should be printed commences.
+    // from the highest number weight. Every time a group is finished it
+    // checks if the group name should be printed.
 
     print!("Konvertirano: \n\t\t");
 
@@ -259,11 +259,11 @@ struct GroupInfo {
     plural_type: PluralType,
 }
 
-fn load_input(inpt: String) -> Result<(Vec<Number>, bool), ()> {
+fn parse_input(input: String) -> Result<(Vec<Number>, bool), ()> {
     let mut result = Vec::new();
     let mut in_currency = false;
 
-    let mut input = inpt.trim().to_owned();
+    let mut input = input.trim().to_owned();
     let length = input.len();
 
     if length > 2 {
@@ -302,15 +302,15 @@ fn load_input(inpt: String) -> Result<(Vec<Number>, bool), ()> {
 fn get_input() -> Result<String, ()> {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() > 2 {
-        println!("Previše argumenata!");
+    if args.len() != 1 {
+        println!("Too many arguments!");
         return Err(());
     }
 
     match args.get(1) {
         Some(arg) => Ok(arg.to_owned()),
         None => {
-            println!("Nije upisan broj kao argument!");
+            println!("There are no arguments!");
             Err(())
         }
     }

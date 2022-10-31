@@ -1,4 +1,4 @@
-# Number to Word Convertor (cro)
+# Number to Word Convertor (cro/hr)
 
 CLI program that converts numbers to words in Croatian language.
 
@@ -6,11 +6,13 @@ CLI program that converts numbers to words in Croatian language.
 
 It is recommended to run this program in a terminal which supports colors.
 
-## Setup
+## How to install
+
+You can easily download the executable from the [releases tab](https://github.com/Blatko1/num-word-conv/releases/) or you can just build it manually.
 
 First, clone the source code and enter it's directory.
 
-Then build the '*.exe*':
+Then build the *executable*:
 
 ```console
 > cargo build --release
@@ -29,12 +31,12 @@ number-to-word-converter
 │   
 └───target
     │   release
-    │   |   **number-to-word-converter.exe**  <--
+    │   |   **num-word-converter.exe**  <--
     │   |   ...
     │   ...
 ```
 
-Copy the highlighted '*.exe*' to some more accessible place and rename it if you want a simpler command name.
+Copy the highlighted '*.exe*' to some more accessible place and rename it how you want.
 
 ## How to Run
 
@@ -44,11 +46,11 @@ Open your terminal in the same directory where the '*.exe*' is and type:
 number-to-word-converter 435
 ```
 
+> **The command name which triggers this function can be whatever you name your '*.exe*' file (*\<name_of_executable> \<any_number>*)**.
+
 Your output should look like this:
 
 ```console
 Konvertirano:
         četiristo trideset pet
 ```
-
-The command name which triggers this function can be whatever you name your '*.exe*' file (*\<name_of_.exe_file> \<any_number>*).
