@@ -15,7 +15,7 @@ First, clone the source code and enter it's directory.
 Then build the *executable*:
 
 ```console
-> cargo build --release
+$ cargo build --release
 ```
 
 After the build process is done, go to folder:
@@ -38,12 +38,12 @@ number-to-word-converter
 
 Copy the highlighted '*.exe*' to some more accessible place and rename it how you want.
 
-## How to Run
+## Usage
 
 Open your terminal in the same directory where the '*.exe*' is and type:
 
 ```console
-number-to-word-converter 435
+$ converter 435
 ```
 
 > **The command name which triggers this function can be whatever you name your '*.exe*' file (*\<name_of_executable> \<any_number>*)**.
