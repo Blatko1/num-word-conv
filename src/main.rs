@@ -259,22 +259,10 @@ struct GroupInfo {
     plural_type: PluralType,
 }
 
-fn parse_input(input: String) -> Result<(Vec<Number>, bool), ()> {
+fn parse_input(input: String) -> Result<Vec<Number>, ()> {
     let mut result = Vec::new();
-    let mut in_currency = false;
 
-    let mut input = input.trim().to_owned();
-    let length = input.len();
-
-    if length > 2 {
-        let last_two = &input[length - 2..length];
-        if last_two.eq("kn") {
-            in_currency = true;
-            input.pop();
-            input.pop();
-        }
-    }
-
+    let input = input.trim();
     let mut chars = input.chars();
 
     // Check if all chars are digits
@@ -283,36 +271,31 @@ fn parse_input(input: String) -> Result<(Vec<Number>, bool), ()> {
         return Err(());
     }
 
-    // Fill padding. Turns [1,4,7,9] -> [0,0,1,4,7,9]
-    let number_len = input.trim().len();
-    let padding_count = 3 - (number_len % 3);
-    if padding_count != 3 {
-        for _ in 0..padding_count {
+    // Fill padding with zeroes. Converts: [1,4,7,9] to [0,0,1,4,7,9]
+    let number_count = input.len();
+    let unfilled = 3 - number_count % 3;
+    if unfilled != 3 {
+        for _ in 0..unfilled {
             result.push(Number::Zero);
         }
     }
-
-    for c in input.trim().chars() {
+    
+    for c in chars {
         result.push(c.into());
     }
 
-    Ok((result, in_currency))
+    Ok(result)
 }
 
 fn get_input() -> Result<String, ()> {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() != 1 {
-        println!("Too many arguments!");
-        return Err(());
+    if args.len() == 1 {
+        return Ok(args.get(1).unwrap().to_owned())
     }
-
-    match args.get(1) {
-        Some(arg) => Ok(arg.to_owned()),
-        None => {
-            println!("There are no arguments!");
-            Err(())
-        }
+    else {
+        println!("Invalid arguments!");
+        return Err(())
     }
 }
 
@@ -329,7 +312,7 @@ impl From<char> for Number {
             '7' => Number::Seven,
             '8' => Number::Eight,
             '9' => Number::Nine,
-            _ => panic!("Not a number!"),
+            _ => unreachable!("UNREACHABLE: not a number!"),
         }
     }
 }
