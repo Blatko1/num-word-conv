@@ -1,7 +1,10 @@
+#[cfg(test)]
+mod tests;
+
 use colored::Colorize;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum Number {
+pub enum Number {
     Zero,
     One,
     Two,
@@ -14,29 +17,22 @@ enum Number {
     Nine,
 }
 
-enum PluralType {
+pub enum PluralType {
     One,
     TwoFour,
     FiveNine,
 }
 
-fn main() {
-    let input = match get_input() {
-        Ok(i) => i,
-        Err(_) => return,
-    };
-
-    let nums = match parse_input(input) {
-        Ok(n) => n,
-        Err(_) => return,
-    };
+fn main() -> Result<(), ()> {
+    let input = get_input()?;
+    let nums = parse_input(input)?;
 
     if nums.len() > MAX_NUMBER_LEN {
         println!(
             "Veličina broja s više od {} znamenki još nije uprogramirana!",
             MAX_NUMBER_LEN
         );
-        return;
+        return Err(());
     }
 
     // The provided number is split into groups with 3 members starting
@@ -45,8 +41,7 @@ fn main() {
 
     print!("Konvertirano: \n\t\t");
 
-    let length = nums.len();
-    let group_count = (length as f32 / 3.0).ceil() as usize;
+    let group_count = (nums.len() as f32 / 3.0).ceil() as usize;
 
     for g in 0..group_count {
         let offset = 3 * g;
@@ -61,7 +56,7 @@ fn main() {
         // Used for checking special word cases
         // Second part of the check filters out the last group.
         let g_inverse = group_count - g - 1;
-        let is_last_group = g == group_count - 1;
+        let is_last_group = g == (group_count - 1);
         let is_special_unit_name = (g_inverse % 2 != 0) && !is_last_group;
 
         let (converted, plural_type) = convert(group, is_special_unit_name);
@@ -88,18 +83,99 @@ fn main() {
         }
     }
     println!("\n");
+    Ok(())
 }
 
-fn convert(
+pub fn convert(
     group: [Number; 3],
     is_special_unit_name: bool,
 ) -> (String, PluralType) {
     let mut converted = String::new();
     let mut plural_type = PluralType::FiveNine;
+    let mut should_skip_units = false;
 
-    let last_digit = group[2];
+    // Convert the hundreds:
+    let hundreds_val = *group.first().unwrap();
+    match hundreds_val {
+        Number::Zero => (),
+        v => {
+            let digit = HUNDREDS[v as usize - 1];
+            converted.push_str(digit);
+            converted.push(' ');
+        }
+    }
 
-    for (i, digit) in group.iter().enumerate() {
+    // Convert the tens:
+    let tens_val = *group.get(1).unwrap();
+    match tens_val {
+        Number::Zero => (),
+        Number::One => {
+            let units_val = *group.last().unwrap();
+            if units_val == Number::Zero {
+                let digit = TENS[0];
+                converted.push_str(digit);
+                converted.push(' ');
+            } else {
+                let digit = NAEST[units_val as usize - 1];
+                converted.push_str(digit);
+                converted.push(' ');
+            }
+            should_skip_units = true;
+        }
+        v => {
+            let digit = TENS[v as usize - 1];
+            converted.push_str(digit);
+            converted.push(' ');
+        }
+    }
+
+    // Convert the units (if the tens digit was not '1'):
+    if !should_skip_units {
+        let units_val = *group.last().unwrap();
+        let digit = units_val as usize;
+        match units_val {
+            Number::Zero => (),
+            Number::One => {
+                plural_type = PluralType::One;
+                if is_special_unit_name {
+                    let special_digit = ALT_UNITS[0];
+                    converted.push_str(special_digit);
+                    converted.push(' ');
+                } else {
+                    let digit = UNITS[digit as usize - 1];
+                    converted.push_str(digit);
+                    converted.push(' ');
+                }
+            },
+            Number::Two => {
+                plural_type = PluralType::TwoFour;
+                if is_special_unit_name {
+                    let special_digit = ALT_UNITS[1];
+                    converted.push_str(special_digit);
+                    converted.push(' ');
+                } else {
+                    let digit = UNITS[digit as usize - 1];
+                    converted.push_str(digit);
+                    converted.push(' ');
+                }
+            }
+            Number::Four | Number::Three => {
+                plural_type = PluralType::TwoFour;
+
+                let digit = UNITS[digit as usize - 1];
+                converted.push_str(digit);
+                converted.push(' ');
+            }
+            _ => {
+                let digit = UNITS[digit as usize - 1];
+                converted.push_str(digit);
+                converted.push(' ');
+            }
+        }
+    }
+
+    /*for (i, digit) in group.iter().enumerate() {
+        // It starts from hundreds.
         let digit_position = 2 - i;
         let mut digit_value = *digit as usize;
 
@@ -160,7 +236,7 @@ fn convert(
         let digit = primary_digits[digit_value - 1];
         converted.push_str(digit);
         converted.push(' ');
-    }
+    }*/
 
     (converted, plural_type)
 }
@@ -171,17 +247,16 @@ fn is_blank(group: [Number; 3]) -> bool {
 
 fn parse_input(input: String) -> Result<Vec<Number>, ()> {
     let mut result = Vec::new();
-
     let input = input.trim();
-    let mut chars = input.chars();
+    let chars = input.chars();
 
     // Check if all chars are digits
-    if !chars.all(|x| x.is_ascii_digit()) {
+    if !chars.clone().all(|x| x.is_ascii_digit()) {
         println!("Upisan je znak koji nije znamenka!");
         return Err(());
     }
 
-    // Fill padding with zeroes. Converts: [1|4,7,9] to [0,0,1|4,7,9]
+    // Fill padding with zeroes. Converts: [1,4,7,9] to [0,0,1|4,7,9]
     let number_count = input.len();
     let unfilled = 3 - number_count % 3;
     if unfilled != 3 {
@@ -190,7 +265,7 @@ fn parse_input(input: String) -> Result<Vec<Number>, ()> {
         }
     }
 
-    for c in input.chars() {
+    for c in chars {
         result.push(c.into());
     }
 
@@ -227,13 +302,14 @@ impl From<char> for Number {
 }
 
 const MAX_NUMBER_LEN: usize = (GROUP_NAMES.len() + 1) * 3;
-
+// TODO maybe replace NAEST into a special array
 const PRIMARIES: &[&[&str]] = &[NAEST, UNITS, TENS, HUNDREDS];
 
 const UNITS: &[&str] = &[
     "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet",
-    "jedna", "dvije",
 ];
+
+const ALT_UNITS: &[&str] = &["jedna", "dvije"];
 
 const NAEST: &[&str] = &[
     "jedanaest",
@@ -288,47 +364,3 @@ const BILIJARDE: &[&str] = &["bilijarda", "bilijarde", "bilijardi"];
 const TRILIJUNI: &[&str] = &["trilijun", "trilijuna"];
 
 const TRILIJARDE: &[&str] = &["trilijarda", "trilijarde", "trilijardi"];
-
-#[test]
-fn test1() {
-    let hundreds = Number::Four;
-    let tens = Number::One;
-    let units = Number::Three;
-    let thousands = false;
-
-    let g = [hundreds, tens, units];
-    assert_eq!(convert(g, thousands).0, "četiristo trinaest ");
-}
-
-#[test]
-fn test2() {
-    let hundreds = Number::Zero;
-    let tens = Number::Zero;
-    let units = Number::Three;
-    let thousands = false;
-
-    let g = [hundreds, tens, units];
-    assert_eq!(convert(g, thousands).0, "tri ");
-}
-
-#[test]
-fn test3() {
-    let hundreds = Number::Zero;
-    let tens = Number::Three;
-    let units = Number::Three;
-    let thousands = false;
-
-    let g = [hundreds, tens, units];
-    assert_eq!(convert(g, thousands).0, "trideset tri ");
-}
-
-#[test]
-fn test4() {
-    let hundreds = Number::Zero;
-    let tens = Number::One;
-    let units = Number::Six;
-    let thousands = false;
-
-    let g = [hundreds, tens, units];
-    assert_eq!(convert(g, thousands).0, "šesnaest ");
-}
