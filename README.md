@@ -58,3 +58,5 @@ Konvertirano:
 ## Resources
 
 - [nazivi velikih dekadnih jedinica](https://vdocuments.mx/nazivi-velikih-dekadnih-jedinica.html?page=7) - great resource of big number names for Europe and SAD
+
+- [Jezični savjetnik - veliki brojevi](https://blog.dnevnik.hr/stitch/2006/03/1620772080/veliki-brojevi.html?page=blog&id=1620772080&subdomain=stitch) - all big number names up to 'decilijarda'
