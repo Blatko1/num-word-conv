@@ -54,3 +54,7 @@ Your output should look like this:
 Konvertirano:
         četiristo trideset pet
 ```
+
+## Resources
+
+- [nazivi velikih dekadnih jedinica](https://vdocuments.mx/nazivi-velikih-dekadnih-jedinica.html?page=7) - great resource of big number names for Europe and SAD
