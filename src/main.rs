@@ -3,26 +3,6 @@ mod tests;
 
 use colored::{ColoredString, Colorize};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Number {
-    Zero,
-    One,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-}
-
-pub enum PluralType {
-    One,
-    TwoFour,
-    FiveNine,
-}
-
 fn main() -> Result<(), ()> {
     let input = get_input()?;
     println!("Konvertirano: \n\t\t");
@@ -58,7 +38,7 @@ pub fn num_word_conv(input: String) -> Result<Vec<ColoredString>, ()> {
         let group = [nums[offset], nums[offset + 1], nums[offset + 2]];
 
         if is_blank(group) {
-            return Ok(result);
+            continue;
         }
 
         // Used for checking special word cases.
@@ -76,12 +56,12 @@ pub fn num_word_conv(input: String) -> Result<Vec<ColoredString>, ()> {
         if !is_last_group {
             // Get the belonging group.
             let group_name = GROUP_NAMES[g_inverse - 1];
-            
+
             let name = match plural_type {
-                // Appropriate group plural name for unit '1' is positioned 
+                // Appropriate group plural name for unit '1' is positioned
                 // at the index '0' of a 'group_name'.
                 PluralType::One => group_name[0].green(),
-                // Appropriate group plural name for units '2', '3' and '4' is positioned 
+                // Appropriate group plural name for units '2', '3' and '4' is positioned
                 // at the index of '1' of a 'group_name'.
                 PluralType::TwoFour => group_name[1].green(),
                 // Appropriate group plural name for units '5', '6', '7', '8', '9'
@@ -233,6 +213,26 @@ impl From<char> for Number {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Number {
+    Zero,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+}
+
+pub enum PluralType {
+    One,
+    TwoFour,
+    FiveNine,
+}
+
 const MAX_NUMBER_LEN: usize = (GROUP_NAMES.len() + 1) * 3;
 
 const UNITS: &[&str] = &[
@@ -296,6 +296,32 @@ const KVADRILIJUN: &[&str] = &["kvadrilijun", "kvadrilijuna"];
 const KVADRILIJARDA: &[&str] =
     &["kvadrilijarda", "kvadrilijarde", "kvadrilijardi"];
 
+const KVINTILIJUN: &[&str] = &["kvintilijun", "kvintilijuna"];
+
+const KVINTILIJARDA: &[&str] =
+    &["kvintilijarda", "kvintilijarde", "kvintilijardi"];
+
+const SEKSTILIJUN: &[&str] = &["sekstilijun", "sekstilijuna"];
+
+const SEKSTILIJARDA: &[&str] =
+    &["sekstilijarda", "sekstilijarde", "sekstilijardi"];
+
+const SEPTILIJUN: &[&str] = &["septilijun", "septilijuna"];
+
+const SEPTILIJARDA: &[&str] = &["septilijarda", "septilijarde", "septilijardi"];
+
+const OKTILIJUN: &[&str] = &["oktilijun", "oktilijuna"];
+
+const OKTILIJARDA: &[&str] = &["oktilijarda", "oktilijarde", "oktilijardi"];
+
+const NONILIJUN: &[&str] = &["nonilijun", "nonilijuna"];
+
+const NONILIJARDA: &[&str] = &["nonilijarda", "nonilijarde", "nonilijardi"];
+
+const DECILIJUN: &[&str] = &["decilijun", "decilijuna"];
+
+const DECILIJARDA: &[&str] = &["decilijarda", "decilijarde", "decilijardi"];
+
 const GROUP_NAMES: &[&[&str]] = &[
     THOUSANDS,
     MILIJUN,
@@ -306,4 +332,16 @@ const GROUP_NAMES: &[&[&str]] = &[
     TRILIJARDA,
     KVADRILIJUN,
     KVADRILIJARDA,
+    KVINTILIJUN,
+    KVINTILIJARDA,
+    SEKSTILIJUN,
+    SEKSTILIJARDA,
+    SEPTILIJUN,
+    SEPTILIJARDA,
+    OKTILIJUN,
+    OKTILIJARDA,
+    NONILIJUN,
+    NONILIJARDA,
+    DECILIJUN,
+    DECILIJARDA
 ];
