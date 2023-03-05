@@ -7,3 +7,16 @@ edition = "2021"
 
 [dependencies]
 colored = "2.0.0"
+
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "performance_comparison"
+harness = false
+
+[[test]]
+path = "benches/results_test.rs"
+name = "results_test"
+opt-level = 3
+test = true
