@@ -173,7 +173,9 @@ fn is_blank(group: [Number; 3]) -> bool {
     group.iter().all(|&n| n == Number::Zero)
 }
 
-fn parse_input(input: &str) -> Result<(Vec<Number>, Vec<Number>), &'static str> {
+fn parse_input(
+    input: &str,
+) -> Result<(Vec<Number>, Vec<Number>), &'static str> {
     let mut whole = Vec::new();
     let mut decimal = Vec::new();
     let mut input = input.trim().to_owned();
@@ -235,11 +237,10 @@ fn parse_input(input: &str) -> Result<(Vec<Number>, Vec<Number>), &'static str> 
         decimal.push(decimal_chars.next().unwrap().into());
         if decimal_part.len() == 1 {
             decimal.push(Number::Zero);
-        }else {
-        decimal.push(decimal_chars.next().unwrap().into());
+        } else {
+            decimal.push(decimal_chars.next().unwrap().into());
         }
     }
-
     Ok((whole, decimal))
 }
 
