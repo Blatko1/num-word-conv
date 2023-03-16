@@ -48,12 +48,20 @@ $ converter 435
 
 > **The command name which triggers this function can be whatever you name your '*.exe*' file (*\<name_of_executable> \<any_number>*)**.
 
-Your output should look like this:
+Your output should look similar to this:
 
 ```console
 Konvertirano:
         četiristo trideset pet
 ```
+
+### Decimals and separators
+
+This program also supports decimal numbers but only up to 2 decimals max.
+
+You can also separate digits with characters **underscores** ('_'), **spaces** (' ') and **points** ('.').
+
+- **When entering decimal numbers or using space digit separators, make sure to put the whole number in between "quotes".**
 
 ## Resources
 
