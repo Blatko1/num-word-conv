@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests;
+mod consts;
 
 use colored::{ColoredString, Colorize};
+use consts::{PluralType, GROUP_NAMES, Number, HUNDREDS, TENS, NAEST, ALT_UNITS, UNITS};
 
 fn main() -> Result<(), ()> {
     let input = get_input()?;
@@ -19,10 +21,10 @@ pub fn num_word_conv<S: AsRef<str>>(
     let mut result: Vec<ColoredString> = Vec::new();
     let nums = parse_input(input.as_ref())?;
 
-    if nums.len() > MAX_NUMBER_LEN {
+    if nums.len() > consts::MAX_NUMBER_LEN {
         println!(
             "Veličina broja s više od {} znamenki još nije uprogramirana!",
-            MAX_NUMBER_LEN
+            consts::MAX_NUMBER_LEN
         );
         return Err(());
     }
@@ -197,154 +199,3 @@ fn get_input() -> Result<String, ()> {
     println!("Invalid arguments!");
     Err(())
 }
-
-impl From<char> for Number {
-    fn from(c: char) -> Self {
-        match c {
-            '0' => Number::Zero,
-            '1' => Number::One,
-            '2' => Number::Two,
-            '3' => Number::Three,
-            '4' => Number::Four,
-            '5' => Number::Five,
-            '6' => Number::Six,
-            '7' => Number::Seven,
-            '8' => Number::Eight,
-            '9' => Number::Nine,
-            _ => unreachable!("UNREACHABLE: not a number!"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Number {
-    Zero,
-    One,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-}
-
-pub enum PluralType {
-    One,
-    TwoFour,
-    FiveNine,
-}
-
-const MAX_NUMBER_LEN: usize = (GROUP_NAMES.len() + 1) * 3;
-
-const UNITS: &[&str] = &[
-    "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet",
-];
-
-const ALT_UNITS: &[&str] = &["jedna", "dvije"];
-
-const NAEST: &[&str] = &[
-    "jedanaest",
-    "dvanaest",
-    "trinaest",
-    "četrnaest",
-    "petnaest",
-    "šesnaest",
-    "sedamnaest",
-    "osamnaest",
-    "devetnaest",
-];
-
-const TENS: &[&str] = &[
-    "deset",
-    "dvadeset",
-    "trideset",
-    "četrdeset",
-    "pedeset",
-    "šezdeset",
-    "sedamdeset",
-    "osamdeset",
-    "devedeset",
-];
-
-const HUNDREDS: &[&str] = &[
-    "sto",
-    "dvjesto",
-    "tristo",
-    "četiristo",
-    "petsto",
-    "šesto",
-    "sedamsto",
-    "osamsto",
-    "devetsto",
-];
-
-const THOUSANDS: &[&str] = &["tisuća", "tisuće"];
-
-const MILIJUN: &[&str] = &["milijun", "milijuna"];
-
-const MILIJARDA: &[&str] = &["milijarda", "milijarde", "milijardi"];
-
-const BILIJUN: &[&str] = &["bilijun", "bilijuna"];
-
-const BILIJARDA: &[&str] = &["bilijarda", "bilijarde", "bilijardi"];
-
-const TRILIJUN: &[&str] = &["trilijun", "trilijuna"];
-
-const TRILIJARDA: &[&str] = &["trilijarda", "trilijarde", "trilijardi"];
-
-const KVADRILIJUN: &[&str] = &["kvadrilijun", "kvadrilijuna"];
-
-const KVADRILIJARDA: &[&str] =
-    &["kvadrilijarda", "kvadrilijarde", "kvadrilijardi"];
-
-const KVINTILIJUN: &[&str] = &["kvintilijun", "kvintilijuna"];
-
-const KVINTILIJARDA: &[&str] =
-    &["kvintilijarda", "kvintilijarde", "kvintilijardi"];
-
-const SEKSTILIJUN: &[&str] = &["sekstilijun", "sekstilijuna"];
-
-const SEKSTILIJARDA: &[&str] =
-    &["sekstilijarda", "sekstilijarde", "sekstilijardi"];
-
-const SEPTILIJUN: &[&str] = &["septilijun", "septilijuna"];
-
-const SEPTILIJARDA: &[&str] = &["septilijarda", "septilijarde", "septilijardi"];
-
-const OKTILIJUN: &[&str] = &["oktilijun", "oktilijuna"];
-
-const OKTILIJARDA: &[&str] = &["oktilijarda", "oktilijarde", "oktilijardi"];
-
-const NONILIJUN: &[&str] = &["nonilijun", "nonilijuna"];
-
-const NONILIJARDA: &[&str] = &["nonilijarda", "nonilijarde", "nonilijardi"];
-
-const DECILIJUN: &[&str] = &["decilijun", "decilijuna"];
-
-const DECILIJARDA: &[&str] = &["decilijarda", "decilijarde", "decilijardi"];
-
-const GROUP_NAMES: &[&[&str]] = &[
-    THOUSANDS,
-    MILIJUN,
-    MILIJARDA,
-    BILIJUN,
-    BILIJARDA,
-    TRILIJUN,
-    TRILIJARDA,
-    KVADRILIJUN,
-    KVADRILIJARDA,
-    KVINTILIJUN,
-    KVINTILIJARDA,
-    SEKSTILIJUN,
-    SEKSTILIJARDA,
-    SEPTILIJUN,
-    SEPTILIJARDA,
-    OKTILIJUN,
-    OKTILIJARDA,
-    NONILIJUN,
-    NONILIJARDA,
-    DECILIJUN,
-    DECILIJARDA,
-];

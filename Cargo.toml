@@ -16,7 +16,6 @@ name = "performance_comparison"
 harness = false
 
 [[test]]
-path = "benches/results_test.rs"
-name = "results_test"
-opt-level = 3
+path = "benches/result_test.rs"
+name = "result_test"
 test = true

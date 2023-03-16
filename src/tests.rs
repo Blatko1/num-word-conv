@@ -1,3 +1,11 @@
+#[path ="../benches/version1.rs"]
+mod version1;
+#[path ="../benches/version2.rs"]
+mod version2;
+
+use version1::num_word_conv as conv1;
+use version2::num_word_conv as conv2;
+use std::io::Write;
 use crate::{convert, Number as Num};
 
 #[test]
@@ -92,4 +100,21 @@ fn hundreds() {
 fn special() {
     let g = [Num::Zero, Num::Zero, Num::Zero];
     assert_eq!(convert(g, false).0, "");
+}
+
+#[test]
+fn compare_results() {
+    let mut stdout = std::io::stdout().lock();
+    for arg in 1..1_000_003 {
+        let args = arg.to_string();
+
+        let result1 = conv1(args.clone()).unwrap();
+        let result2 = conv2(args).unwrap();
+
+        assert_eq!(result1, result2);
+
+        if arg % 10000 == 0 {
+            writeln!(stdout, "_______NEXT______{}", arg).unwrap();
+        }
+    }
 }
