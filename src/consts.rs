@@ -111,7 +111,8 @@ pub const SEKSTILIJARDA: &[&str] =
 
 pub const SEPTILIJUN: &[&str] = &["septilijun", "septilijuna"];
 
-pub const SEPTILIJARDA: &[&str] = &["septilijarda", "septilijarde", "septilijardi"];
+pub const SEPTILIJARDA: &[&str] =
+    &["septilijarda", "septilijarde", "septilijardi"];
 
 pub const OKTILIJUN: &[&str] = &["oktilijun", "oktilijuna"];
 

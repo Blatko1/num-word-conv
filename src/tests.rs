@@ -1,12 +1,12 @@
-#[path ="../benches/version1.rs"]
+#[path = "../benches/version1.rs"]
 mod version1;
-#[path ="../benches/version2.rs"]
+#[path = "../benches/version2.rs"]
 mod version2;
 
+use crate::{convert, Number as Num};
+use std::io::Write;
 use version1::num_word_conv as conv1;
 use version2::num_word_conv as conv2;
-use std::io::Write;
-use crate::{convert, Number as Num};
 
 #[test]
 fn units() {

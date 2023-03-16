@@ -14,8 +14,3 @@ criterion = "0.4.0"
 [[bench]]
 name = "performance_comparison"
 harness = false
-
-[[test]]
-path = "benches/result_test.rs"
-name = "result_test"
-test = true
